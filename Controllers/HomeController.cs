@@ -12,7 +12,7 @@ namespace FlightSearcher.Controllers
     public class HomeController : Controller
     {
         private readonly ILogger<HomeController> _logger;
-
+        private readonly NeoDriver driver = new NeoDriver("bolt://neo4j.fis.agh.edu.pl", "u7trybuch", "297926");
         public HomeController(ILogger<HomeController> logger)
         {
             _logger = logger;
@@ -20,10 +20,11 @@ namespace FlightSearcher.Controllers
 
         public async Task<IActionResult> Index()
         {
-            var driver = new NeoDriver("bolt://neo4j.fis.agh.edu.pl", "u7trybuch", "297926");
-            await driver.AddAirport("O'HARE INTERNATIONAL AIRPORT", "Chicago", "United States of America");
-            var all = await driver.GetAllFromLabel(LabelNames.Airport);
-            return View();
+            //await FillAirports();
+            //await CreateRelationshipBetweenAirports();
+            var all = await driver.GetAllAirports();
+
+            return View(all);
         }
 
         public IActionResult Privacy()
@@ -35,6 +36,20 @@ namespace FlightSearcher.Controllers
         public IActionResult Error()
         {
             return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+        }
+
+        private async Task FillAirports()
+        {
+            await driver.AddAirport("O'Hare International Airport", "Chicago", "United States of America", "ORD");
+            await driver.AddAirport("Hartsfield Jackson", "Atlanta", "United States of America", "ATL");
+            await driver.AddAirport("Heathrow", "London", "United Kingdom", "LHR");
+            await driver.AddAirport("Charles De Gaulle", "Paris", "France", "CDG");
+            await driver.AddAirport("Los Angeles International Airport", "Los Angeles", "United States of America", "LAX");
+        }
+        private async Task CreateRelationshipBetweenAirports()
+        {
+            await driver.CreateRelationshipBetweenAirports("ATL", "ORD", "10:30");
+            await driver.CreateRelationshipBetweenAirports("ORD", "ATL", "15:20");
         }
     }
 }

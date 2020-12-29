@@ -1,0 +1,14 @@
+﻿
+@{
+    ViewData["Title"] = "Index";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@model List<ConnectionViewModel>
+
+<h3>Connections between @Model[0].FirstAirport.Name and @Model[0].SecondAirport.Name </h3>
+
+@foreach (var conn in Model)
+{
+    <p class="connectionsPara">Departure time: @conn.Hour</p>
+}

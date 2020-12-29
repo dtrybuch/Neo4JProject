@@ -1,5 +1,7 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using FlightSearcher.Models;
+using Microsoft.AspNetCore.Mvc;
 using Neo4j.Driver;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,12 +16,12 @@ namespace FlightSearcher
         {
             _driver = GraphDatabase.Driver(uri, AuthTokens.Basic(user, password));
         }
-        public async Task AddAirport(string name, string city, string country)
+        public async Task AddAirport(string name, string city, string country, string code)
         {
-            var allFromLabel = await GetAllFromAirportByName(name);
+            var allFromLabel = await GetAllFromAirportByCode(code);
             if (allFromLabel.Any()) return;
-            await ExecuteQuery("CREATE (n:AirportDT { name: $name, city: $city, country: $country }) RETURN n.name",
-                         new { name, city, country });
+            await ExecuteQuery("CREATE (n:AirportDT { name: $name, city: $city, country: $country, code: $code }) RETURN n.name",
+                         new { name, city, country, code });
 
         }
         public async Task AddPilot(string firstName, string lastName, int countOfHours)
@@ -47,23 +49,43 @@ namespace FlightSearcher
                 await session.CloseAsync();
             }
         }
+        public async Task CreateRelationshipBetweenAirports(string firstCode, string secondCode, string hour)
 
-
-
-        public async Task<List<string>> GetAllFromLabel(string label)
         {
-            var records = new List<string>();
+            IAsyncSession session = _driver.AsyncSession();
+            try
+            {
+                await session.WriteTransactionAsync(async tx =>
+                { 
+                    var reader = await tx.RunAsync("MATCH (a:AirportDT),(b:AirportDT) WHERE a.code = $firstCode AND b.code = $secondCode" +
+                        " CREATE (a) -[r:LEADS_TO { hour: $hour }] -> (b)" +
+                        " RETURN type(r), r.hour", new { firstCode, secondCode, hour});
+                });
+            }
+            finally
+            {
+                // asynchronously close session
+                await session.CloseAsync();
+            }
+        }
+
+        public async Task<List<AirportViewModel>> GetAllAirports()
+        {
+            var records = new List<AirportViewModel>();
             IAsyncSession session = _driver.AsyncSession();
             try
             {
                 var added = await session.WriteTransactionAsync(async tx =>
                 {
-                    var reader = await tx.RunAsync($"MATCH (n:{label}) RETURN n.name");
+                    var reader = await tx.RunAsync($"MATCH (n:AirportDT) RETURN n");
                     while (await reader.FetchAsync())
                     {
                         // Each current read in buffer can be reached via Current
                         if(reader != null && reader.Current.Keys.Count > 0)
-                            records.Add(reader.Current[0]?.ToString());
+                        {
+                            var nodeProps = JsonConvert.SerializeObject(reader.Current[0].As<INode>().Properties);
+                            records.Add(JsonConvert.DeserializeObject<AirportViewModel>(nodeProps));
+                        }
                     }
                     return records;
                 });
@@ -76,10 +98,48 @@ namespace FlightSearcher
             return records;
         }
 
-
-        public async Task<List<string>> GetAllFromAirportByName(string name)
+        public async Task<List<ConnectionViewModel>> GetAllAirportsConnections(string firstCode, string secondCode)
         {
-            var records = new List<string>();
+            var records = new List<ConnectionViewModel>();
+            IAsyncSession session = _driver.AsyncSession();
+            try
+            {
+                var added = await session.WriteTransactionAsync(async tx =>
+                {
+                    var reader = await tx.RunAsync("MATCH (a:AirportDT {code: $firstCode })<-[conn:LEADS_TO]-(b:AirportDT {code: $secondCode}) " +
+                        "RETURN a, b, conn.hour", new { firstCode, secondCode});
+                    while (await reader.FetchAsync())
+                    {
+                        // Each current read in buffer can be reached via Current
+                        if (reader != null && reader.Current.Keys.Count > 2)
+                        {
+                            var firstNode = JsonConvert.SerializeObject(reader.Current.Values["a"].As<INode>().Properties);
+                            var firstAirport = JsonConvert.DeserializeObject<AirportViewModel>(firstNode);
+                            var secondNode = JsonConvert.SerializeObject(reader.Current.Values["b"].As<INode>().Properties);
+                            var secondAirport = JsonConvert.DeserializeObject<AirportViewModel>(secondNode);
+                            var hour = reader.Current.Values["conn.hour"].ToString();
+                            records.Add(new ConnectionViewModel() 
+                            { 
+                                FirstAirport = firstAirport,
+                                SecondAirport = secondAirport,
+                                Hour = hour
+                            });
+                        }
+                    }
+                    return records;
+                });
+            }
+            finally
+            {
+                // asynchronously close session
+                await session.CloseAsync();
+            }
+            return records;
+        }
+
+        public async Task<List<AirportViewModel>> GetAllFromAirportByName(string name)
+        {
+            var records = new List<AirportViewModel>();
             IAsyncSession session = _driver.AsyncSession();
             try
             {
@@ -90,7 +150,39 @@ namespace FlightSearcher
                     {
                         // Each current read in buffer can be reached via Current
                         if (reader != null && reader.Current.Keys.Count > 0)
-                            records.Add(reader.Current[0]?.ToString());
+                        {
+                            var nodeProps = JsonConvert.SerializeObject(reader.Current[0].As<INode>().Properties);
+                            records.Add(JsonConvert.DeserializeObject<AirportViewModel>(nodeProps));
+                        }
+                    }
+                    return records;
+                });
+            }
+            finally
+            {
+                // asynchronously close session
+                await session.CloseAsync();
+            }
+            return records;
+        }
+
+        public async Task<List<AirportViewModel>> GetAllFromAirportByCode(string code)
+        {
+            var records = new List<AirportViewModel>();
+            IAsyncSession session = _driver.AsyncSession();
+            try
+            {
+                var added = await session.WriteTransactionAsync(async tx =>
+                {
+                    var reader = await tx.RunAsync($"MATCH (n:AirportDT) WHERE n.code = $code RETURN n", new { code });
+                    while (await reader.FetchAsync())
+                    {
+                        // Each current read in buffer can be reached via Current
+                        if (reader != null && reader.Current.Keys.Count > 0)
+                        {
+                            var nodeProps = JsonConvert.SerializeObject(reader.Current[0].As<INode>().Properties);
+                            records.Add(JsonConvert.DeserializeObject<AirportViewModel>(nodeProps));
+                        }
                     }
                     return records;
                 });

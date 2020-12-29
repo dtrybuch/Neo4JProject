@@ -1,8 +1,87 @@
-﻿@{
-    ViewData["Title"] = "Home Page";
+﻿
+@{
+    ViewData["Title"] = "Index";
+    Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://docs.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
-</div>
+@model List<AirportViewModel>
+
+
+    <div class="dropdown">
+        <button onclick="myFunction('startDropdown')" class="dropbtn">Choose Start Airport</button>
+        <div id="startDropdown" class="dropdown-content">
+            <input type="text" placeholder="Search.." id="startInput" class="myInput" onkeyup="filterFunction('startInput', 'startDropdown')">
+            @{
+                foreach (var v in Model)
+                {
+                    <a onclick='ChangeValue("@v.Name", "startInput", "startP", "startDropdown", "@v.Code", "startCode")'>
+                        @v.Name
+                    </a>
+                }
+            }
+        </div>
+        <p id="startP">&nbsp</p>
+        <p id="startCode" style="display:none"></p>
+    </div>
+    <div class="dropdown">
+        <button onclick="myFunction('endDropdown')" class="dropbtn">Choose End Airport</button>
+        <div id="endDropdown" class="dropdown-content">
+            <input type="text" placeholder="Search.." id="endInput" class="myInput" onkeyup="filterFunction('endInput', 'endDropdown')">
+            @{
+                foreach (var v in Model)
+                {
+                    <a onclick='ChangeValue("@v.Name", "endInput", "endP", "endDropdown", "@v.Code", "endCode")'>
+                        @v.Name
+                    </a>
+                }
+            }
+        </div>
+        <p id="endP">&nbsp</p>
+        <p id="endCode" style="display:none"></p>
+    </div>
+<br />
+<center> <button onclick="GetConnections()" class="btn-block">Search</button></center>
+
+<script>
+    /* When the user clicks on the button,
+    toggle between hiding and showing the dropdown content */
+    function myFunction(dropdown) {
+        document.getElementById(dropdown).classList.toggle("show");
+    }
+
+    function filterFunction(inputName, dropdown) {
+        var input, filter, ul, li, a, i;
+        input = document.getElementById(inputName);
+        filter = input.value.toUpperCase();
+        div = document.getElementById(dropdown);
+        a = div.getElementsByTagName("a");
+        for (i = 0; i < a.length; i++) {
+            txtValue = a[i].textContent || a[i].innerText;
+            if (txtValue.toUpperCase().indexOf(filter) > -1) {
+                a[i].style.display = "";
+            } else {
+                a[i].style.display = "none";
+            }
+        }
+    }
+    function ChangeValue(newValue, inputName, pName, dropdown, newCode, codePName) {
+        ChangeP(newValue, pName);
+        ChangeP(newCode, codePName);
+        myFunction(dropdown);
+    }
+    function ChangeP(text, pName) {
+        p = document.getElementById(pName);
+        p.innerText = text;
+    }
+    function GetConnections() {
+        pStart = document.getElementById("startCode");
+        pStartText = pStart.innerText;
+        pEnd = document.getElementById("endCode");
+        pEndText = pEnd.innerText;
+        if (!pStartText || pStartText == "" || !pEndText || pEndText == "") {
+            alert("Choose Airports!!!");
+            return;
+        }
+        document.location.href = window.location.protocol + "//" + window.location.host + "/airports?first=" + pStartText + "&second=" + pEndText; 
+    }
+</script>
