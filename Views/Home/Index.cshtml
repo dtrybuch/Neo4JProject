@@ -14,13 +14,13 @@
             @{
                 foreach (var v in Model)
                 {
-                    <a onclick='ChangeValue("@v.Name", "startInput", "startP", "startDropdown", "@v.Code", "startCode")'>
-                        @v.Name
+                    <a onclick='ChangeValue("@v.Name, \n  @v.City, @v.Country", "startInput", "startP", "startDropdown", "@v.Code", "startCode")'>
+                        @v.Name, @v.City, @v.Country
                     </a>
                 }
             }
         </div>
-        <p id="startP">&nbsp</p>
+        <p id="startP">&nbsp <br /> &nbsp</p>
         <p id="startCode" style="display:none"></p>
     </div>
     <div class="dropdown">
@@ -30,13 +30,13 @@
             @{
                 foreach (var v in Model)
                 {
-                    <a onclick='ChangeValue("@v.Name", "endInput", "endP", "endDropdown", "@v.Code", "endCode")'>
-                        @v.Name
-                    </a>
+                        <a onclick='ChangeValue("@v.Name, \n @v.City, @v.Country", "endInput", "endP", "endDropdown", "@v.Code", "endCode")'>
+                            @v.Name, @v.City, @v.Country
+                        </a>
                 }
             }
         </div>
-        <p id="endP">&nbsp</p>
+        <p id="endP">&nbsp <br /> &nbsp</p>
         <p id="endCode" style="display:none"></p>
     </div>
 <br />

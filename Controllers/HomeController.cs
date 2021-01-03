@@ -20,17 +20,14 @@ namespace FlightSearcher.Controllers
 
         public async Task<IActionResult> Index()
         {
-            //await FillAirports();
-            //await CreateRelationshipBetweenAirports();
+            await driver.DeleteAllAirports();
+            await FillAirports();
+            await CreateRelationshipBetweenAirports();
             var all = await driver.GetAllAirports();
 
             return View(all);
         }
 
-        public IActionResult Privacy()
-        {
-            return View();
-        }
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
         public IActionResult Error()
@@ -48,8 +45,35 @@ namespace FlightSearcher.Controllers
         }
         private async Task CreateRelationshipBetweenAirports()
         {
-            await driver.CreateRelationshipBetweenAirports("ATL", "ORD", "10:30");
-            await driver.CreateRelationshipBetweenAirports("ORD", "ATL", "15:20");
+            await driver.CreateRelationshipBetweenAirports("ATL", "ORD", "10:30","16:30", "Boeing 737", "American Airlines", "John McClane");
+            await driver.CreateRelationshipBetweenAirports("ORD", "ATL", "15:20", "21:20", "Boeing 787", "American Airlines", "John Travolta");
+
+            await driver.CreateRelationshipBetweenAirports("LHR", "ORD", "10:30", "23:30", "Boeing 757", "American Airlines", "John Wayne");
+            await driver.CreateRelationshipBetweenAirports("ORD", "LHR", "20:20", "09:20", "Boeing 787", "American Airlines", "John Travolta");
+
+            await driver.CreateRelationshipBetweenAirports("CDG", "ORD", "10:30", "18:30", "Boeing 757", "American Airlines", "John Wayne");
+            await driver.CreateRelationshipBetweenAirports("ORD", "CDG", "20:20", "02:20", "Boeing 787", "American Airlines", "John Travolta");
+
+            await driver.CreateRelationshipBetweenAirports("LAX", "ORD", "10:30", "10:30", "Boeing 737", "American Airlines", "John McClane");
+            await driver.CreateRelationshipBetweenAirports("ORD", "LAX", "15:20", "01:20", "Boeing 787", "American Airlines", "John Travolta");
+
+            //await driver.CreateRelationshipBetweenAirports("ATL", "LHR", "10:30", "18:30", "Boeing 737", "American Airlines", "John McClane");
+            //await driver.CreateRelationshipBetweenAirports("LHR", "ATL", "15:20", "23:20", "Boeing 787", "American Airlines", "John Travolta");
+
+            await driver.CreateRelationshipBetweenAirports("CDG", "LHR", "10:30", "11:30", "Boeing 737", "Air France", "David Cameron");
+            await driver.CreateRelationshipBetweenAirports("LHR", "CDG", "15:20", "16:20", "Boeing 787", "Air France", "Emmanuel Macron");
+
+            //await driver.CreateRelationshipBetweenAirports("ATL", "LAX", "10:30", "16:30", "Boeing 737", "American Airlines", "John McClane");
+            //await driver.CreateRelationshipBetweenAirports("LAX", "ATL", "15:20", "21:20", "Boeing 787", "American Airlines", "John Travolta");
+
+            //await driver.CreateRelationshipBetweenAirports("ATL", "CDG", "10:30", "23:30", "Boeing 737", "American Airlines", "John McClane");
+            //await driver.CreateRelationshipBetweenAirports("CDG", "ATL", "15:20", "04:20", "Boeing 787", "American Airlines", "John Travolta");
+
+
+            //await driver.CreateRelationshipBetweenAirports("LAX", "LHR", "10:30", "16:30", "Boeing 737", "American Airlines", "John McClane");
+            //await driver.CreateRelationshipBetweenAirports("LHR", "LAX", "15:20", "21:20", "Boeing 787", "American Airlines", "John Travolta");
+
+
         }
     }
 }

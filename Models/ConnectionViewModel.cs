@@ -9,6 +9,11 @@ namespace FlightSearcher.Models
     {
         public AirportViewModel FirstAirport { get; set; }
         public AirportViewModel SecondAirport { get; set; }
-        public string Hour { get; set; }
+        public string StartHour { get; set; }
+        public string EndHour { get; set; }
+        public string PilotName { get; set; }
+        public string AirplaneName { get; set; }
+        public string AirlineName { get; set; }
+        public List<ConnectionViewModel> Changes { get; set; } = new List<ConnectionViewModel>();
     }
 }

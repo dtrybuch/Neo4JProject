@@ -10,5 +10,44 @@
 
 @foreach (var conn in Model)
 {
-    <p class="connectionsPara">Departure time: @conn.Hour</p>
+<table>
+    <tr>
+        <th>Departure time </th>
+        <th>Landed time</th>
+        <th>Airline </th>
+        <th>Airplane </th>
+        <th>Pilot </th>
+        <th>Airport from</th>
+        <th>Airport to</th>
+    </tr>
+    <tr>
+        <td>@conn.StartHour</td>
+        <td>@conn.EndHour</td>
+        <td>@conn.AirlineName</td>
+        <td>@conn.AirplaneName</td>
+        <td>@conn.PilotName</td>
+        <td>@conn.FirstAirport.Name,<br />  @conn.FirstAirport.City, @conn.FirstAirport.Country</td>
+        <td>@conn.SecondAirport.Name,<br />  @conn.SecondAirport.City, @conn.SecondAirport.Country</td>
+    </tr>
+    @if (conn.Changes.Any())
+    {
+        <tr><th colspan="7" style="text-align:center">Changes</th></tr>
+    }
+    @foreach (var change in conn.Changes)
+    {
+        <tr>
+            <td>@change.StartHour</td>
+            <td>@change.EndHour</td>
+            <td>@change.AirlineName</td>
+            <td>@change.AirplaneName</td>
+            <td>@change.PilotName</td>
+            <td>@change.FirstAirport.Name,<br /> @change.FirstAirport.City, @change.FirstAirport.Country</td>
+            <td>@change.SecondAirport.Name,<br />  @change.SecondAirport.City, @change.SecondAirport.Country</td>
+        </tr>
+    }
+</table>
 }
+<br />
+<br />
+<br />
+<center> <button onclick="window.history.back()" class="btn-block">Back</button></center>

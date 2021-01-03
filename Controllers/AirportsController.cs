@@ -12,6 +12,16 @@ namespace FlightSearcher.Controllers
         public async Task<IActionResult> Index(string first, string second)
         {
             var rt = await driver.GetAllAirportsConnections(first, second);
+            if(!rt.Any())
+            {
+                var firstAirport = await driver.GetAllAirportByCode(first);
+                var secondAirport = await driver.GetAllAirportByCode(second);
+                rt.Add(new Models.ConnectionViewModel()
+                {
+                    FirstAirport = firstAirport[0],
+                    SecondAirport = secondAirport[0]
+                });
+            }
             return View(rt);
         }
     }
